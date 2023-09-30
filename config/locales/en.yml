@@ -1,3 +1,4 @@
-# English strings go here for Rails i18n
 en:
-  # my_label: "My label"
+  label_task_statuses: "Task Statuses"
+  label_user_groups: "User Groups"
+  label_task_statuses_and_groups: "Association of User Groups with Issue Statuses"

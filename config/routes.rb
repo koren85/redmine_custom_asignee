@@ -1,2 +1,3 @@
-# Plugin's routes
-# See: http://guides.rubyonrails.org/routing.html
+Rails.application.routes.draw do
+  post 'settings/plugin/redmine_custom_asignee', to: 'custom_asignee_settings#update'
+end
