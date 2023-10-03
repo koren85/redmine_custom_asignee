@@ -42,25 +42,33 @@ module RedmineCustomAsignee
 
           plugin_settings = Setting.plugin_redmine_custom_asignee
           excluded_user_ids = []
+          forced_include_user_ids = []
 
           if plugin_settings && plugin_settings['group_data']
             plugin_settings['group_data'].each do |index, data|
               if data['issue_status_id'].to_s == self.status_id.to_s
                 group = Group.find_by(id: data['group_id'].to_i)
-                if data['exclude_all_except_this'].present?
-                  all_other_group_ids = Group.all.ids - [group.id]
-                  all_other_group_users = User.joins(:groups).where('users_groups_users_join.group_id IN (?)', all_other_group_ids).pluck('users.id')
-                  excluded_user_ids += all_other_group_users
-                else
-                  excluded_user_ids += group.users.pluck(:id) if group
+
+                if group
+                  if data['exclude_all_except_this'].present?
+                    all_users_except_current_group = User.joins(:groups).where.not('users_groups_users_join.group_id = ?', group.id).pluck('users.id')
+                    excluded_user_ids += all_users_except_current_group
+                    forced_include_user_ids += group.users.pluck(:id)
+                  else
+                    excluded_user_ids += group.users.pluck(:id)
+                  end
                 end
               end
             end
           end
 
-          users.reject! { |user| excluded_user_ids.include?(user.id) }
+          # Пересекаем списки, чтобы пользователи с галочкой были обязательно включены
+          final_excluded_ids = excluded_user_ids - forced_include_user_ids
+
+          users.reject! { |user| final_excluded_ids.include?(user.id) }
           users.sort
         end
+
 
       end
     end
