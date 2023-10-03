@@ -6,11 +6,18 @@
 
     <% group_data_hash = Setting.plugin_redmine_custom_asignee['group_data'] || {} %>
     <% group_data_hash.each do |index, group| %>
+      <!--      <div class="group" data-index="<%#= index %>">-->
+      <%#= select_tag "settings[group_data][#{index}][issue_status_id]", options_from_collection_for_select(IssueStatus.all, 'id', 'name', group['issue_status_id'].to_i) %>
+      <%#= select_tag "settings[group_data][#{index}][group_id]", options_from_collection_for_select(Group.all, 'id', 'name', group['group_id'].to_i) %>
+      <!--        <%#= button_tag "-", type: "button", class: "remove-group btn btn-danger" %><br>-->
+      <!--      </div>-->
       <div class="group" data-index="<%= index %>">
         <%= select_tag "settings[group_data][#{index}][issue_status_id]", options_from_collection_for_select(IssueStatus.all, 'id', 'name', group['issue_status_id'].to_i) %>
         <%= select_tag "settings[group_data][#{index}][group_id]", options_from_collection_for_select(Group.all, 'id', 'name', group['group_id'].to_i) %>
+        <%= check_box_tag "settings[group_data][#{index}][exclude_all_except_this]", "1", group['exclude_all_except_this'].present? %>
         <%= button_tag "-", type: "button", class: "remove-group btn btn-danger" %><br>
       </div>
+
     <% end %>
   </div>
 
@@ -19,29 +26,36 @@
 
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         const container = document.getElementById("groups-container");
         const addGroupButton = document.querySelector(".add-group");
         const issueStatusOptions = '<%= j(options_from_collection_for_select(IssueStatus.all, 'id', 'name')) %>';
         const groupOptions = '<%= j(options_from_collection_for_select(Group.all, 'id', 'lastname')) %>';
 
-        addGroupButton.addEventListener("click", function() {
+        addGroupButton.addEventListener("click", function () {
             const index = new Date().getTime(); // Generate a unique timestamp as index
             const newGroup = document.createElement("div");
             newGroup.className = "group";
             newGroup.setAttribute("data-index", index);
+            //       newGroup.innerHTML = `
+            //   <select name="settings[group_data][${index}][issue_status_id]">${issueStatusOptions}</select>
+            //   <select name="settings[group_data][${index}][group_id]">${groupOptions}</select>
+            //   <button type="button" class="remove-group btn btn-danger">-</button><br>
+            // `;
             newGroup.innerHTML = `
-        <select name="settings[group_data][${index}][issue_status_id]">${issueStatusOptions}</select>
-        <select name="settings[group_data][${index}][group_id]">${groupOptions}</select>
-        <button type="button" class="remove-group btn btn-danger">-</button><br>
-      `;
+  <select name="settings[group_data][${index}][issue_status_id]">${issueStatusOptions}</select>
+  <select name="settings[group_data][${index}][group_id]">${groupOptions}</select>
+  <input type="checkbox" name="settings[group_data][${index}][exclude_all_except_this]">
+  <button type="button" class="remove-group btn btn-danger">-</button><br>
+`;
+
             container.appendChild(newGroup);
             attachRemoveGroupListener(newGroup);
         });
 
         function attachRemoveGroupListener(element) {
             const removeButton = element.querySelector(".remove-group");
-            removeButton.addEventListener("click", function() {
+            removeButton.addEventListener("click", function () {
                 container.removeChild(element);
             });
         }

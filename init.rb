@@ -12,6 +12,7 @@ Redmine::Plugin.register :redmine_custom_asignee do
 
 
   Rails.configuration.to_prepare do
+    require_dependency 'redmine_custom_asignee/hooks'
     unless Issue.included_modules.include? RedmineCustomAsignee::IssuePatch
       Issue.send(:include, RedmineCustomAsignee::IssuePatch)
     end
